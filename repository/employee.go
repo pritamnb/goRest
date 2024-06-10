@@ -4,6 +4,8 @@ import (
 	"context"
 	"projectx/model"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/bson"
+
 )
 import "fmt"
 type EmployeeRepo struct {
@@ -17,15 +19,15 @@ func (r *EmployeeRepo) InsertEmployee(emp *model.Employee) (interface{}, error){
 		return nil, err
 	}
 
-	return result, nil
+	return result.InsertedID, nil
 }
 
 
-func (r *EmployeeRepo) FindEmployeeByID(empID string)(*model.Employee, error){
+func (r *EmployeeRepo) FindEmployeeByID(empID string) (*model.Employee, error){
 	var emp model.Employee
 
 	err := r.MongoCollection.FindOne(context.Background(),
-		bson.D{{key:"employee", Value: empID}}).Decode(&emp)
+		bson.D{{key:"employee_id", Value: empID}}).Decode(&emp)
 
 	if err != nil {
 		return nil, err
@@ -53,7 +55,7 @@ func (r *EmployeeRepo) FindAllEmployees() (interface{}, error){
 
 func (r *EmployeeRepo) UpdateEmployeeByID(empID string, updateEmp *model.Employee)(int64, error){
 	result, err := r.MongoCollection.UpdateOne(context.Background(),
-				bson.D{{key:"employee_id", value:empID}},
+				bson.D{{key:"employee_id", Value:empID}},
 				bson.D{{key:"$set", Value:updateEmp}})
 	
 	if err !=  nil{
@@ -64,7 +66,7 @@ func (r *EmployeeRepo) UpdateEmployeeByID(empID string, updateEmp *model.Employe
 
 }
 
-func (r *EmployeeRepo) DeleteEmployeeByID(empId string)(int64, error){
+func (r *EmployeeRepo) DeleteEmployeeByID(empID string)(int64, error){
 	result, err := r.MongoCollection.DeleteOne(context.Background(),
 				bson.D{{key:"employee_id", Value:empID}})
 	
@@ -75,7 +77,7 @@ func (r *EmployeeRepo) DeleteEmployeeByID(empId string)(int64, error){
 }
 
 
-func (r *EmployeeRepo) DeleteAllEmployee(empId string)(int64, error){
+func (r *EmployeeRepo) DeleteAllEmployee()(int64, error){
 	result, err := r.MongoCollection.DeleteOne(context.Background(),
 				bson.D{})
 	
